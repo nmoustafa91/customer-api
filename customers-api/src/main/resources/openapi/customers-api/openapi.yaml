@@ -1,0 +1,582 @@
+openapi: 3.0.0
+info:
+  description: "Customers API offers CRUD operations on managing TODO items."
+  version: "0.2.0"
+  title: "Customers API"
+
+servers:
+  - url: http://localhost:9001
+
+paths:
+
+  /customers:
+    get:
+      tags:
+        - "Customers"
+      summary: "Get filtered customers list"
+      description: "Get filtered customers list"
+      operationId: getCustomers
+      parameters:
+        - $ref: '#/components/parameters/CustomerNameQueryParam'
+        - $ref: '#/components/parameters/CustomerFirstNameQueryParam'
+        - $ref: '#/components/parameters/CustomerIdsQueryParam'
+        - $ref: '#/components/parameters/CustomerCityQueryParam'
+        - $ref: '#/components/parameters/CustomerEmailQueryParam'
+        - $ref: '#/components/parameters/CustomerSearchQueryParam'
+        - $ref: '#/components/parameters/PageNumberQueryParam'
+        - $ref: '#/components/parameters/PageSizeQueryParam'
+        - $ref: '#/components/parameters/SortQueryParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/ListCustomersResponse'
+    post:
+      tags:
+        - "Customers"
+      summary: "Create a new customer"
+      description: "Create a new customer"
+      operationId: createCustomer
+      requestBody:
+        $ref: "#/components/requestBodies/CreateCustomerBody"
+      responses:
+        "201":
+          $ref: '#/components/responses/CreateCustomerResponse'
+        "400":
+          description: "Invalid data supplied"
+  /customers/all-customers:
+    get:
+      tags:
+        - "Customers"
+      summary: "Get all customers"
+      description: "Get all customers"
+      operationId: getAllCustomers
+      parameters:
+        - $ref: '#/components/parameters/PageNumberQueryParam'
+        - $ref: '#/components/parameters/PageSizeQueryParam'
+        - $ref: '#/components/parameters/SortQueryParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/ListCustomersResponse'
+
+  /customers/{customerId}:
+    parameters:
+      - $ref: "#/components/parameters/CustomerIdPathParam"
+    get:
+      tags:
+        - "Customers"
+      summary: "Get customer"
+      description: "Get existing customer"
+      operationId: getCustomer
+      responses:
+        "200":
+          $ref: '#/components/responses/GetCustomerResponse'
+        "404":
+          description: "Customer not found"
+    put:
+      tags:
+        - "Customers"
+      summary: "Update a customer"
+      description: "Update existing customer"
+      operationId: updateCustomer
+      parameters:
+        - in: header
+          name: If-Match
+          required: true
+          description: "ETag header value from getCustomer  call"
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateCustomerBody"
+      responses:
+        "200":
+          $ref: '#/components/responses/UpdateCustomerResponse'
+        "400":
+          description: "Invalid data supplied"
+        "404":
+          description: "Customer not found"
+    delete:
+      tags:
+        - "Customers"
+      summary: "Delete customer"
+      description: "Delete existing customer"
+      operationId: deleteCustomer
+      responses:
+        "204":
+          description: "Customer successfully deleted"
+        "404":
+          description: "Customer not found"
+  /customers/single-customer:
+    get:
+      tags:
+        - "Customers"
+      summary: "Get a single record filter by (id, name, and first name)"
+      description: "Get a single record filter by (id, name, and first name)"
+      operationId: getSingleCustomer
+      parameters:
+        - $ref: '#/components/parameters/CustomerIdQueryParam'
+        - $ref: '#/components/parameters/CustomerNameQueryParam'
+        - $ref: '#/components/parameters/CustomerFirstNameQueryParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/GetCustomerResponse'
+        "404":
+          description: "Customer not found"
+
+  /customers/bulk:
+    post:
+      tags:
+        - "Customers"
+      summary: "Create a bulk of customers"
+      description: "Create a bulk of customers"
+      operationId: createCustomers
+      requestBody:
+        $ref: "#/components/requestBodies/BulkCreationRequest"
+      responses:
+        "201":
+          $ref: '#/components/responses/CustomersBulkCreationResponse'
+        "400":
+          description: "Invalid data supplied"
+    put:
+      tags:
+        - "Customers"
+      summary: "Update a bulk of customers"
+      description: "Update a bulk of customers"
+      operationId: updateCustomers
+      requestBody:
+        $ref: "#/components/requestBodies/BulkUpdateRequest"
+      responses:
+        "200":
+          $ref: '#/components/responses/CustomersBulkUpdateResponse'
+        "400":
+          description: "Invalid data supplied"
+    delete:
+      tags:
+        - "Customers"
+      summary: "Delete a bulk of customer"
+      description: "Delete a bulk of customer"
+      operationId: deleteCustomers
+      requestBody:
+        $ref: "#/components/requestBodies/BulkDeleteRequest"
+      responses:
+        "204":
+          description: "Customer successfully deleted"
+        "404":
+          description: "Customer not found"
+
+components:
+  responses:
+    ListCustomersResponse:
+      description: Response with list of customers
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ListCustomersResponse'
+    CreateCustomerResponse:
+      description: Response with created Customer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Customer'
+    CustomersBulkCreationResponse:
+      description: Response with created customers
+      content:
+        application/json:
+          schema:
+            type: "array"
+            items:
+              $ref: '#/components/schemas/Customer'
+    UpdateCustomerResponse:
+      description: Response with updated customer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Customer'
+    CustomersBulkUpdateResponse:
+      description: Response with updated customers
+      content:
+        application/json:
+          schema:
+            type: "array"
+            items:
+              $ref: '#/components/schemas/Customer'
+    GetCustomerResponse:
+      description: Response with existing customer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Customer'
+  requestBodies:
+    CreateCustomerBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateCustomerRequest'
+    BulkCreationRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BulkCreationRequest'
+    UpdateCustomerBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateCustomerRequest'
+    BulkUpdateRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BulkUpdateRequest'
+    BulkDeleteRequest:
+      content:
+        application/json:
+          schema:
+            type: "array"
+            items:
+              $ref: '#/components/schemas/CustomerId'
+  parameters:
+    CustomerIdPathParam:
+      name: customerId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/CustomerId'
+
+    CustomerIdQueryParam:
+      description: Customer id query parameter
+      name: customerId
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/CustomerId'
+
+    CustomerNameQueryParam:
+      description: Customer name query parameter
+      name: name
+      in: query
+      required: false
+      schema:
+        type: "string"
+
+    CustomerFirstNameQueryParam:
+      description: Customer first name query parameter
+      name: firstName
+      in: query
+      required: false
+      schema:
+        type: "string"
+
+    CustomerIdsQueryParam:
+      description: Customers ids query parameter, can be comma-separated list to include multiple values
+      name: customerIds
+      in: query
+      required: false
+      schema:
+        type: array
+        maxItems: 40
+        items:
+          $ref: "#/components/schemas/CustomerId"
+
+    CustomerSearchQueryParam:
+      name: search
+      in: query
+      description: |
+        Provides full text search on Customers.
+
+        Searches in following parameters:
+          * id
+          * name
+      schema:
+        type: string
+      required: false
+
+    CustomerCityQueryParam:
+      description: Customer city query parameter
+      name: city
+      in: query
+      required: false
+      schema:
+        type: "string"
+
+    CustomerEmailQueryParam:
+      description: Customer email query parameter
+      name: email
+      in: query
+      required: false
+      schema:
+        type: "string"
+        format: "email"
+
+    PageNumberQueryParam:
+      description: Page number, default is 0
+      name: pageNumber
+      in: query
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+      required: false
+
+    PageSizeQueryParam:
+      description: Number of items in a page, default page size is 20, maximum 50
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 100
+        default: 20
+      required: false
+
+    SortQueryParam:
+      description: |
+        Sort criteria, format: '?sort=&lt;propertyA&gt;[,&lt;propertyB&gt;][,(asc|desc)]',
+        sort parameter can be used several times in one query
+      name: sort
+      in: query
+      schema:
+        type: string
+      required: false
+
+  schemas:
+    ListCustomersResponse:
+      description: List of customers with paging support
+      properties:
+        results:
+          $ref: '#/components/schemas/CustomersResults'
+        paging:
+          $ref: '#/components/schemas/Paging'
+      required:
+        - results
+        - paging
+
+    BulkCreationRequest:
+      description: List of customers to be created
+      properties:
+        customers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateCustomerRequest'
+      required:
+        - customers
+
+    BulkUpdateRequest:
+      description: List of customers to be updated
+      properties:
+        customers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Customer'
+      required:
+        - customers
+
+    CustomersResults:
+      type: array
+      items:
+        $ref: '#/components/schemas/Customer'
+
+    CreateCustomerRequest:
+      type: object
+      description: Request to create customer
+      allOf:
+        - $ref: "#/components/schemas/CustomerRequestBody"
+
+    UpdateCustomerRequest:
+      type: object
+      description: Request to update customer
+      allOf:
+        - $ref: "#/components/schemas/CustomerRequestBody"
+
+    CustomerRequestBody:
+      type: object
+      properties:
+        person:
+          $ref: '#/components/schemas/PersonData'
+        addresses:
+          type: array
+          items:
+            $ref: "#/components/schemas/AddressData"
+        communications:
+          type: array
+          items:
+            $ref: "#/components/schemas/CommunicationData"
+    
+    Customer:
+      allOf:
+        - type: object
+          properties:
+            customerId:
+              $ref: '#/components/schemas/CustomerId'
+            person:
+              $ref: '#/components/schemas/PersonData'
+            addresses:
+              type: array
+              items:
+                $ref: "#/components/schemas/AddressData"
+            communications:
+              type: array
+              items:
+                $ref: "#/components/schemas/CommunicationData"
+          title: Customer
+        - $ref: '#/components/schemas/Audit'
+
+    PersonData:
+      type: "object"
+      description: "Defines an address"
+      properties:
+        name:
+          type: "string"
+          description: "Customer name"
+        firstName:
+          type: "string"
+          description: "Customer first name"
+        dateOfBirth:
+          type: "string"
+          format: "date"
+
+    AddressData:
+      type: "object"
+      description: "Defines an address"
+      properties:
+        addressType:
+          $ref: '#/components/schemas/AddressType'
+        street:
+          type: "string"
+          description: "Street name"
+        number:
+          type: "string"
+          description: "House number"
+        postal:
+          type: "string"
+          description: "Address postal (zip) code"
+        city:
+          type: "string"
+          description: "City of address"
+
+    CommunicationData:
+      type: "object"
+      description: "Defines communication information"
+      properties:
+        phones:
+          type: array
+          items:
+            $ref: "#/components/schemas/PhoneData"
+        email:
+          type: "string"
+          format: "email"
+          description: "email"
+
+    PhoneData:
+      type: "object"
+      description: "Defines contact phone information"
+      properties:
+        phoneType:
+          $ref: '#/components/schemas/PhoneType'
+        phoneNumber:
+          type: "string"
+          description: "phone number"
+
+    CustomerId:
+      type: "string"
+      format: "uuid"
+
+    AddressType:
+      type: "string"
+      enum:
+        - BILLING
+        - DELIVERY
+
+    PhoneType:
+      type: "string"
+      enum:
+        - MOBILE
+        - PRIVATE
+
+    Paging:
+      type: "object"
+      description: "Paging information"
+      required:
+        - "pageNumber"
+        - "pageSize"
+        - "pageCount"
+        - "totalElements"
+      properties:
+        pageNumber:
+          type: "integer"
+          format: "int32"
+          description: "Page number, first page is 0"
+        pageSize:
+          type: "integer"
+          format: "int32"
+          description: "Number of customers in the page"
+        pageCount:
+          type: "integer"
+          format: "int32"
+          description: "Total number of pages"
+        totalElements:
+          type: "integer"
+          format: "int64"
+          description: "Total number of elements"
+      example:
+        pageNumber: 0
+        pageSize: 20
+        pageCount: 5
+
+    Audit:
+      type: object
+      properties:
+        created:
+          description: Date of creation
+          type: string
+          format: date-time
+        lastModified:
+          description: Date of last modification
+          type: string
+          format: date-time
+        createdBy:
+          type: "string"
+          description: "Created by"
+        lastModifiedBy:
+          type: "string"
+          description: "Last modified by"
+
+    ### ERROR RESPONSE ###
+    ApiErrorResponse:
+      description: Representation of an error which occurred on the server
+      type: object
+      properties:
+        traceId:
+          description: Trace identifier to easily find error on the server
+          type: "string"
+        timestamp:
+          description: Incident date time
+          type: string
+          format: 'date-time'
+          example: '2023-06-01T09:00:43Z'
+        status:
+          description: HTTP response code
+          type: "integer"
+          example: 404
+        message:
+          description: Basic description of problem
+          type: "string"
+          example: Some fields are not valid
+        details:
+          type: array
+          items:
+            description: Detail information about error
+            type: string
+        path:
+          type: "string"
+          description: "Request path"
+          example: "/request"
+        error:
+          type: "string"
+          example: FORBIDDEN
+        code:
+          type: "string"
+          description: |
+            * `CUSTOMERS_ERR_1401_CUSTOMER_NOT_FOUND` - Customer with the given customer id ({}) is not found.
+            * `CUSTOMERS_ERR_1402_CUSTOMER_EMAIL_ALREADY_EXISTS` - Customer with this email or username ({}) already exists.
+            * `CUSTOMERS_ERR_1403_CUSTOMER_PHONE_ALREADY_EXISTS` - Customer with this phone number ({}) already exists.
+tags:
+  - name: "Customers"
+    description: ""
